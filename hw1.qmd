@@ -1,0 +1,462 @@
+---
+title: "Homework Assignment 1"
+author: "Shiyi Li"
+toc: true
+number-sections: true
+highlight-style: pygments
+format: 
+  html: 
+    code-fold: true
+    html-math-method: katex
+  pdf: 
+    geometry: 
+      - top=30mm
+      - left=20mm
+jupyter: python3
+##  docx: Never, unless to accommodate a collaborator
+---
+
+# Git setup:
+1.	First, since my laptop is a MacBook, Git is installed already on my MacBook called “Terminal”.
+2.	Check if Git is already installed.
+
+```{python}
+#| echo: true
+#| output: true
+
+
+%%bash
+git --version
+```
+
+
+# Set up SSH authentication between your computer and your GitHub account:
+
+1.	I created a folder called “3255” on my MacBook.
+
+```{python}
+#| eval: false
+
+
+%%bash
+# Create a new folder called "3255". 
+mkdir 3255 
+# Navigate into the "3255" directory.
+cd 3255        
+# List all the files in the folder. 
+# Since the folder is empty at this point, 
+# this command will output nothing.
+ls   
+```
+
+2.	I checked my local machine for existing SSH keys, before generating a new SSH key. By default, the filenames of supported public keys for GitHub are one of the following, id\_rsa.pub, id\_ecdsa.pub, id\_ed25519.pub. 
+
+```{python}
+#| eval: false
+
+
+%%bash
+# Lists the files in my .ssh directory, if they exist.
+ls -al ~/.ssh           
+
+"""
+Output: 
+total 48
+drwx------   8 shiyili  staff   256 Nov  6 12:29 .
+drwxr-xr-x+ 56 shiyili  staff  1792 Jan 24 17:21 ..
+-rw-------   1 shiyili  staff  3434 Oct  3 23:27 id_rsa
+-rw-r--r--   1 shiyili  staff   746 Oct  3 23:27 id_rsa.pub
+-rw-------   1 shiyili  staff   982 Nov  6 12:29 known_hosts
+-rw-------   1 shiyili  staff   216 Nov  6 12:28 known_hosts.old
+-rw-r--r--   1 shiyili  staff   107 Oct  3 23:53 known_hostsTAB
+-rw-r--r--   1 shiyili  staff     1 Oct  3 23:52 known_hosts^^^^^C
+"""
+```
+
+3.	My terminal output shows I already have an SSH key pair (id\_rsa and id\_rsa.pub). I didn’t want to use the old SSH key pair for this course, so I generated a new SSH key.
+
+```{python}
+#| eval: false
+
+
+%%bash
+# Generate a new SSH key using the email for my GitHub account.
+ssh-keygen -t ed25519 -C "dorothy0217@163.com"           
+
+"""
+Output:
+Generating public/private ed25519 key pair.
+Enter file in which to save the key (/Users/shiyili/.ssh/id_ed25519): 3255 
+Enter passphrase (empty for no passphrase): 
+Enter same passphrase again: 
+Your identification has been saved in 3255
+Your public key has been saved in 3255.pub
+The key fingerprint is:
+SHA256:tHqR0fy3nTxW8Iwph2qdMSFefIqKdnGyJS7N+en1UDg dorothy0217@163.com
+The key's randomart image is:
++--[ED25519 256]--+
+|                 |
+|         o .     |
+|        o + + o  |
+|       . = = * * |
+|        S = E * +|
+|       * @ o X.oo|
+|      = X o = .=.|
+|     . + o o o. .|
+|         .+   .  |
++----[SHA256]-----+
+"""
+```
+
+4.	I changed the SSH key file’s name to “mysshkey” and moved it to the standard SSH directory (~/.ssh) with standard naming conventions. 
+
+```{python}
+#| eval: false
+
+
+%%bash
+mv ~/3255/mysshkey ~/.ssh/id_ed25519
+mv ~/3255/mysshkey.pub ~/.ssh/id_ed25519.pub 
+```
+
+5.	I added the SSH Key to the SSH Agent.
+
+```{python}
+#| echo: true
+#| output: true
+
+
+%%bash
+# Start the ssh-agent in the background.
+eval "$(ssh-agent -s)"            
+```
+
+```{python}
+#| eval: false
+
+
+%%bash
+# Add the SSH Key to the SSH Agent.
+ssh-add --apple-use-keychain ~/.ssh/id_ed25519
+
+"""
+Output:
+Enter passphrase for /Users/shiyili/.ssh/id_ed25519:
+Identity added: /Users/shiyili/.ssh/id_ed25519 (dorothy0217@163.com)
+"""
+```
+
+6.	I opened and edited the SSH Config File by adding:
+```plaintext 
+Host github.com 
+	AddKeysToAgent yes 
+	UseKeychain yes 
+	IdentityFile ~/.ssh/id_ed25519
+```
+to the SSH Config File and save the changed SSH Config File.
+
+```{python}
+#| eval: false
+
+
+%%bash
+touch ~/.ssh/config
+# Open the SSH Config File.
+open ~/.ssh/config    
+```       
+
+7.	I found my public SSH key on the terminal.
+
+```{python}
+#| echo: true
+#| output: true
+
+
+%%bash
+# To show the public key on the terminal.
+cat ~/.ssh/id_ed25519.pub           
+```
+
+8.	 I connected my SSH key to my GitHub account.
+
+        a.	I copied the terminal output from the last step.
+        b.	I logged into my GitHub account.
+        c.	I clicked my profile at the top right corner, selected “Settings” and clicked “SSH and GPG keys”.
+        d.	I clicked the “New SSH key” button, fill out the title with my name, “Shiyili”, pasted my public SSH key found on my terminal, 
+        ```plaintext
+            “ssh-ed25519
+            AAAAC3NzaC1lZDI1NTE5AAAAIPCj2WNK9nylkIjDHwgnrTGNyUX7xAwIH6fNZYM8H0iZ 
+            dorothy0217@163.com”.
+        ```
+        e.	Finally, I clicked “Add SSH key” to add my SSH key to my GitHub account.
+
+
+9.	I checked that my SSH key was successfully connected to my GitHub account. 
+
+```{python}
+#| eval: false
+
+
+%%bash
+# Verify that the SSH key works with GitHub.
+ssh -T git@github.com
+
+"""
+Output:
+Hi Shiyi-Li027! You've successfully authenticated, but GitHub does not provide shell access.
+"""
+```
+
+10.	I used the authenticated SSH key to clone the repository, “1-setting-up-git-and-quarto-Shiyi-Li027”,  to the "3255" local folder.
+
+```{python}
+#| eval: false
+
+
+%%bash
+# Clone the repository to the "3255" local folder.
+git clone git@github.com:ids25s/1-setting-up-git-and-quarto-Shiyi-Li027.git
+
+"""
+Output:
+Cloning into '1-setting-up-git-and-quarto-Shiyi-Li027'...
+remote: Enumerating objects: 8, done.
+remote: Counting objects: 100% (8/8), done.
+remote: Compressing objects: 100% (5/5), done.
+remote: Total 8 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+Receiving objects: 100% (8/8), done.
+"""
+```
+
+11.	I checked if I successfully cloned the repository, “1-setting-up-git-and-quarto-Shiyi-Li027”, to the "3255" local folder, but I found out that the folder, “3255”, is still empty, meaning that I didn’t successfully clone the repository to the "3255" local folder.
+
+```{python}
+#| eval: false
+
+
+%%bash
+# Navigate to the directory of the "3255" folder.
+cd ~/3255        
+# List all the file’s name in the "3255" folder.
+ls
+
+"""
+Output:     # Output nothing here
+"""
+```
+
+12.	I used Google Chrome and ChatGPT and figured out that the repository was successfully cloned but was not cloned into the “3255” folder. By default, Git clones the repository into a folder named after the repository itself in my current working directory, my home directory. So, I checked the files in my home directory and found the cloned repository, “1-setting-up-git-and-quarto-Shiyi-Li027”, in the home directory. Finally, I successfully moved the repository to the “3255” folder. 
+
+```{python}
+#| eval: false
+
+
+%%bash
+# Navigate to the home directory.
+cd ~
+# List all the file’s name at the home directory.
+ls
+
+"""
+Output:
+1-setting-up-git-and-quarto-Shiyi-Li027	Pictures
+3255					Public
+Applications				Rplot.png
+CSE Coding Projects-UConn		Untitled.ipynb
+Desktop					Untitled.txt
+Documents				Untitled1.ipynb
+Documents\download_wmm			Untitled2.ipynb
+Downloads				Untitled3.ipynb
+Library					ocean.txt
+Movies					print([1,2,3,4]+[1,2,3,4]).py
+Music					query_form.py
+"""
+```
+
+```{python}
+#| eval: false
+
+
+%%bash
+# Move the repository, “1-setting-up-git-and-quarto-Shiyi-Li027”, to the “3255” folder.
+mv ~/1-setting-up-git-and-quarto-Shiyi-Li027 ~/3255
+```
+
+```{python}
+#| echo: true
+#| output: true
+
+
+%%bash
+# Navigate to the directory of the “3255” folder.
+cd ~/3255      
+# List all the file’s name in the “3255” folder.
+ls
+```
+
+
+# Quarto setup:
+
+1.	I clicked the “Get Started” link in the class note.
+2.	I downloaded the 1.6.40 Quarto CLI (Mac OS).
+3.	I chose the VS Code to install the Quarto VS Code Extension (Quarto v1.118.0) since I already installed the VS Code as my code editor on my MacBook.
+4.	I opened the VS Code on my MacBook, clicked the “New File…” icon in the left column below the “Start”, and selected the “Quarto Document” environment.
+5.	I copied the homework template, “templates/hw.qmd”, found in the class note and pasted the homework template into the new Quarto Document file that I just created.
+6.  I checked which Python the kernel is using.
+
+```{python}
+import sys
+print(sys.executable)
+```
+
+7.  I installed the matplotlib, plotly, and numpy Python packages into the path of the python, "/opt/anaconda3/bin/python", that I am using.
+
+```{python}
+#| echo: true
+#| output: true
+
+
+%%bash
+/opt/anaconda3/bin/python -m pip install matplotlib plotly numpy
+```
+
+8.  I used the Cmd+Shift+P keyboard shortcut, clicked the "Python: Select Interpreter", and chose Python 3.12.4 with the path, "/opt/anaconda3/bin/python", to manually set the Kernel that I am going to use.
+
+9.  I reproduced the example of the line plot on the polar axis to check if Quarto is set successfully on my VS Code.
+
+For a demonstration of a line plot on a polar axis, see @fig-polar-1.
+
+```{python}
+#| echo: true
+#| label: fig-polar-1
+#| fig-cap: "A line plot on a polar axis"
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+r = np.arange(0, 2, 0.01)
+theta = 2 * np.pi * r
+fig, ax = plt.subplots(
+  subplot_kw = {'projection': 'polar'} 
+)
+ax.plot(theta, r)
+ax.set_rticks([0.5, 1, 1.5, 2])
+ax.grid(True)
+plt.show()
+```
+
+10.  I installed Pandoc on my MacBook.
+
+11.  I changed the line of code that defines theta as "theta = 4 * np.pi * r".
+
+For a demonstration of a line plot on a polar axis, see @fig-polar-2.
+
+```{python}
+#| label: fig-polar-2
+#| fig-cap: "A line plot on a polar axis"
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+r = np.arange(0, 2, 0.01)
+theta = 4 * np.pi * r
+fig, ax = plt.subplots(
+  subplot_kw = {'projection': 'polar'} 
+)
+ax.plot(theta, r)
+ax.set_rticks([0.5, 1, 1.5, 2])
+ax.grid(True)
+plt.show()
+```
+
+12. I changed "fig-cap" to "fig-alt" to make the figure cross-referenceable.
+
+For a demonstration of a line plot on a polar axis, see @fig-polar-3.
+
+```{python}
+#| label: fig-polar-3
+#| fig-alt: "A line plot on a polar axis"
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+r = np.arange(0, 2, 0.01)
+theta = 4 * np.pi * r
+fig, ax = plt.subplots(
+  subplot_kw = {'projection': 'polar'} 
+)
+ax.plot(theta, r)
+ax.set_rticks([0.5, 1, 1.5, 2])
+ax.grid(True)
+plt.show()
+```
+
+13. I wrote down the steps, code chunks, and output, used for setting up Git and SSH key.
+
+14. I renamed this Quarto Document file as “hw1-Shiyi Li.qmd” and saved it on my desktop.
+
+15. I render this Quarto Document file, “hw1-Shiyi Li.qmd”, to PDF.
+
+```{python}
+#| eval: false
+
+
+%%bash
+quarto render "/Users/shiyili/Desktop/hw1-Shiyi Li.qmd" --to pdf
+
+"""
+Output:
+Starting bash kernel...Done
+
+Executing 'hw1-Shiyi Li.quarto_ipynb'
+  Cell 1/5: ''...Done
+  Cell 2/5: ''...Done
+  Cell 3/5: ''...Done
+  Cell 4/5: ''...Done
+  Cell 5/5: ''...Done
+
+pandoc 
+  to: latex
+  output-file: hw1-Shiyi-Li.tex
+  standalone: true
+  pdf-engine: xelatex
+  variables:
+    graphics: true
+    tables: true
+  default-image-extension: pdf
+  toc: true
+  number-sections: true
+  
+metadata
+  documentclass: scrartcl
+  classoption:
+    - DIV=11
+    - numbers=noendperiod
+  papersize: letter
+  header-includes:
+    - \KOMAoption{captions}{tableheading}
+  block-headings: true
+  title: Homework Assignment 1
+  author: Shiyi Li
+  geometry:
+    - top=30mm
+    - left=20mm
+  
+
+Rendering PDF
+running xelatex - 1
+  This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex)
+   restricted \write18 enabled.
+  entering extended mode
+  
+running xelatex - 2
+  This is XeTeX, Version 3.141592653-2.6-0.999996 (TeX Live 2024) (preloaded format=xelatex)
+   restricted \write18 enabled.
+  entering extended mode
+  
+
+Output created: hw1-Shiyi-Li.pdf
+"""
+```
+
+16. Finally, created a release in my repo on GitHub and uploaded my pdf output, "hw1-Shiyi Li.pdf" to the release.
